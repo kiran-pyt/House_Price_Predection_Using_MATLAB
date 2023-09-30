@@ -1,0 +1,245 @@
+clc
+clear All
+close all
+
+
+% CRIM: Per capita crime rate by town
+% ZN: Proportion of residential land zoned for lots over 25,000 sq. ft
+% INDUS: Proportion of non-retail business acres per town
+% CHAS: Charles River dummy variable (= 1 if tract bounds river; 0 otherwise)
+% NOX: Nitric oxide concentration (parts per 10 million)
+% RM: Average number of rooms per dwelling
+% AGE: Proportion of owner-occupied units built prior to 1940
+% DIS: Weighted distances to five Boston employment centers
+% RAD: Index of accessibility to radial highways
+% TAX: Full-value property tax rate per $10,000
+% PTRATIO: Pupil-teacher ratio by town
+% B: 1000(Bk — 0.63)², where Bk is the proportion of [people of African American descent] by town
+% LSTAT: Percentage of lower status of the population
+% MEDV: Median value of owner-occupied homes in $1000s
+
+
+
+M = readtable('Boston.csv');
+
+
+%% checking for the missing value
+Y = table2array(M);
+
+TF = sum(ismissing(Y),1);
+TF1=sum(isnan(Y),1); 
+T=Y(:,2:end);                                                              %% removing the index coloumn
+Average=mean(T,1);                                                         %% average of each column in the datset
+sta=std(T,[],1,"omitnan");                                                 %% standard devation in the matlab
+ma=max(T,1);                                                               %% maximum in the dataset 
+mi=min(T,1);                                                               %% minimum in the dataset
+V=var(T,[],1,"omitnan");                                                   %% variance in the data set
+p_1=prctile(T,25,1);                                                       %% percentile within 25%
+p_2=prctile(T,50,1);                                                       %% percentile within 50%
+p_3=prctile(T,75,1);                                                       %% percentile within 75%
+k = kurtosis(T,1);                                                         %% kurtosis of the data                                      
+y = skewness(T,1);                                                         %% skewness of the data
+%%
+def_disc=[Average;p_1;p_2;p_3;ma;mi;y;V;sta;k;];
+%%
+figure(1)
+subplot(2,7,1)
+boxplot(T(:,1))
+ylabel('CRIM')
+hold on
+subplot(2,7,2)
+boxplot(T(:,2))
+ylabel('ZN')
+hold on
+subplot(2,7,3)
+boxplot(T(:,3))
+ylabel('INDUS')
+hold on
+subplot(2,7,4)
+boxplot(T(:,4))
+ylabel('CHAS')
+hold on
+subplot(2,7,5)
+boxplot(T(:,5))
+ylabel('NOX')
+hold on
+subplot(2,7,6)
+boxplot(T(:,6))
+ylabel('RM')
+hold on
+subplot(2,7,7)
+boxplot(T(:,7))
+ylabel('AGE')
+hold on
+subplot(2,7,8)
+boxplot(T(:,8))
+ylabel('DIS')
+hold on
+subplot(2,7,9)
+boxplot(T(:,9))
+ylabel('RAD')
+hold on
+subplot(2,7,10)
+boxplot(T(:,10))
+ylabel('TAX')
+hold on
+subplot(2,7,11)
+boxplot(T(:,11))
+ylabel('PTRATIO')
+hold on
+subplot(2,7,12)
+boxplot(T(:,12))
+ylabel('BLACK')
+hold on
+subplot(2,7,13)
+boxplot(T(:,13))
+ylabel('LSTAT')
+hold on
+subplot(2,7,14)
+boxplot(T(:,14))
+ylabel('MDEV')
+%%
+%%
+%%%Visualization
+cdata= (corr(T));                                                       
+xvalues = {'Crim','Zn','Indus','Chas','Nox','Rm','Age','Dis','Rad','Tax','Pt-Ratio','B','L-Stat','Medv'};
+yvalues = {'Crim','Zn','Indus','Chas','Nox','Rm','Age','Dis','Rad','Tax','Pt-Ratio','B','L-Stat','Medv'};
+figure(2)
+
+h = heatmap(xvalues,yvalues,cdata);
+
+%%
+%Removing of outliers 
+% T(:,1:2)=[];
+% T(:,10)=[];
+% T_OL=T;
+%% neglected 
+%%RAD and Tax correlated with +0.91
+%%DIS and Age correlated with -0.75
+%% and they don't have much dependence on the medeve
+%%crim ,zn and black neglected because they have high outliers 
+
+%% chas has less dependence on medev
+
+%% RM,LSTAT,NOX,INDUX,PT-ratio are taken into account
+ %%0.7 -0.73,0.48,-0.42 -0.58
+
+
+T=[T(:,3),T(:,5:6),T(:,11),T(:,13:14)];
+%%
+%Removing correlated values
+
+% T(:,5:8)=[];
+% T_OC=T;
+% cdata= (corr(T_OC));                                                       
+% xvalues = {'Indus','Chas','Nox','Rm','Pt-Ratio','L-Stat','Medv'};
+% yvalues = {'Indus','Chas','Nox','Rm','Pt-Ratio','L-Stat','Medv'};
+% figure(3)
+% h = heatmap(xvalues,yvalues,cdata);
+%%
+%Removing poorly correlate values
+% T(:,1:3)=[];
+% T(:,2)=[];
+% T_RU=T;
+%%
+figure(4)
+subplot(5,1,1);
+s1 = plot(T(:,1), T(:,6),'g+');
+set(s1, 'MarkerSize', 8, 'LineWidth', 2);
+%%% regression line
+hold on
+l = lsline ;
+hold on
+set(l,'LineWidth', 2)
+%%% axis display 
+xlabel('Indus', 'FontSize', 10)
+ylabel('Medv', 'FontSize', 10)
+set(gca, 'FontSize', 10, 'YMinorTick','on','XMinorTick','on')
+%%
+
+subplot(5,1,2);
+s2 = plot(T(:,2), T(:,6),'g+');
+set(s2, 'MarkerSize', 8, 'LineWidth', 2);
+%%% regression line
+hold on
+l = lsline ;
+
+set(l,'LineWidth', 2)
+%%% axis display 
+xlabel('Nox', 'FontSize', 10)
+ylabel('Medv', 'FontSize', 10)
+set(gca, 'FontSize', 10, 'YMinorTick','on','XMinorTick','on')
+%%% regression line
+%%
+
+subplot(5,1,3);
+s3 = plot(T(:,3), T(:,6),'g+');
+set(s3, 'MarkerSize', 8, 'LineWidth', 2);
+%%% regression line
+hold on
+l = lsline ;
+
+set(l,'LineWidth', 2)
+%%% axis display 
+xlabel('Rm', 'FontSize', 10)
+ylabel('Medv', 'FontSize', 10)
+set(gca, 'FontSize', 10, 'YMinorTick','on','XMinorTick','on')
+%%
+
+subplot(5,1,4);
+s4 = plot(T(:,4), T(:,6),'g+');
+set(s4, 'MarkerSize', 8, 'LineWidth', 2);
+%%% regression line
+hold on
+l = lsline ;
+
+set(l,'LineWidth', 2)
+%%% axis display 
+xlabel('PTratio', 'FontSize', 10)
+ylabel('Medv', 'FontSize', 10)
+set(gca, 'FontSize', 10, 'YMinorTick','on','XMinorTick','on')
+%%
+subplot(5,1,5);
+s5 = plot(T(:,5), T(:,6),'g+');
+set(s5, 'MarkerSize', 8, 'LineWidth', 2);
+%%% regression line
+hold on
+l = lsline ;
+
+set(l,'LineWidth', 2)
+%%% axis display 
+xlabel('Lstat', 'FontSize', 10)
+ylabel('Medv', 'FontSize', 10)
+set(gca, 'FontSize', 10, 'YMinorTick','on','XMinorTick','on')
+
+
+
+%% Spliting for test and train data
+Train_independent=T(1:405,1:5);
+Train_dependent=T(1:405,6);
+%%
+Test_independent=T(406:506,1:5);
+Test_dependent=T(406:506,6);
+s=size(Train_dependent,1);
+%%
+%fitting model
+mdl=fitlm(Train_independent,Train_dependent);
+
+%%%
+y_predict=predict(mdl,Train_independent);
+RMSE=sqrt(sum((Train_dependent-y_predict).^2/s));
+MSE=(sum((Train_dependent-y_predict).^2)/s);
+MAE=(sum(abs(Train_dependent-y_predict))/s);
+
+
+
+
+
+%%
+%Testing
+s1=size(Test_dependent,1);
+y_predict1=predict(mdl,Test_independent);
+RMSE1=sqrt(sum((Test_dependent-y_predict1).^2/s1));
+MSE1=(sum((Test_dependent-y_predict1).^2)/s1);
+MAE1=(sum(abs(Test_dependent-y_predict1))/s1);
+
